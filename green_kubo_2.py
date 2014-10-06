@@ -15,6 +15,19 @@ def wait():
 	m.getch()
 
 def main():
+	"""
+	Argument list:
+	1-to-x : file names
+				The filename is ctritical. It should have the form xxxx_id.yyy
+				The prefactor file will use each files' id to find a corresponding match in the prefactor file
+	x+1    : pre-factor file
+				The prefactor file should have a specific format. Namely, the last entry should be the prefactor
+				and the one just before should be it the timestep
+	x+2    : which column in the files to use
+				!!!0-based!!!
+	x+3    : number of rows to consider
+				if nrows<1 then all rows are considered
+	"""
     numOfFiles = len(sys.argv)-4
     listOfFiles = sys.argv[1:-3]     #names of files
     prfcFile = sys.argv[-3]
@@ -34,31 +47,26 @@ def main():
     for k in range(numOfFiles):
         print "K is ================== ", str(k)
         print listOfFiles[k]
-	if nrows > 0:
-            correlation_data = autocorr(listOfFiles[k],coln,nrows)
-        else:
-            correlation_data = autocorr(listOfFiles[k],coln)
+        if nrows > 0: correlation_data = autocorr(listOfFiles[k],coln,nrows)
+        else: correlation_data = autocorr(listOfFiles[k],coln)
 
-# find the prefactor
         tmp = listOfFiles[k][::-1]
-	rndkey = listOfFiles[k][-tmp.find("_"):-tmp.find(".")] #find the last occurance of "_" and "."
+        rndkey = listOfFiles[k][-tmp.find("_"):-tmp.find(".")] #find the last occurance of "_" and "."
         print ".... key = ", rndkey
         for elem in prefacs:    
             if elem[0] == float(rndkey):
                 prfc = float(elem[-1])
                 tstep = float(elem[-2])
                 break
-# calculate the conductivity for this run
-        # the prefactor is mutiplied by a constant
-	# because in some of the files there is an error in the prefactor
-	conduc = prfc*cumtrapz(correlation_data, tstep*1e-12)
+
+        conduc = prfc*cumtrapz(correlation_data, tstep*1e-12)
         avcondc.append(conduc)
-# write to file
+
         corrOfFiles.append(correlation_data)
         fout_corr = open(listOfFiles[k]+".corr",'w')
         print "writing to file... "
         fout_corr.write("#corr k \n")
-	fout_corr.write("#(Jm/s)^2 W/mK \n")
+        fout_corr.write("#(Jm/s)^2 W/mK \n")
         for p in range(len(correlation_data)-1): # N=len(corr_data) => len(conduc)=N-1
             fout_corr.write(str(correlation_data[p])+" "+str(conduc[p])+"\n")
         fout_corr.close()
@@ -77,7 +85,6 @@ def main():
         fout.write("\n" + str(time[p]) + " " + str(avcorr[p]) + " " + str(avcondc[p]) + " " + str(sigmcond[p]))
     fout.close()
     
-# This function produces a .corr file for each file given as input
 def autocorr(flname,coln,nrows=-1):
 
     #### Data extraction ####
@@ -88,8 +95,8 @@ def autocorr(flname,coln,nrows=-1):
     data = np.loadtxt(flname, skiprows=2 ,delimiter=" ", 
                       usecols=(coln,) )
     if nrows > 0:
-	print "++++++croppping++++++"
-	print str(len(data))
+    print "++++++croppping++++++"
+    print str(len(data))
         data = data[:nrows]
     # get the length of the data
     Nsteps = len(data)
