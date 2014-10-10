@@ -12,22 +12,22 @@ import numpy as np
 import sys
 #import Gnuplot, Gnuplot.funcutils
 def wait():
-	m.getch()
+    m.getch()
 
 def main():
-	"""
-	Argument list:
-	1-to-x : file names
-				The filename is ctritical. It should have the form xxxx_id.yyy
-				The prefactor file will use each files' id to find a corresponding match in the prefactor file
-	x+1    : pre-factor file
-				The prefactor file should have a specific format. Namely, the last entry should be the prefactor
-				and the one just before should be it the timestep
-	x+2    : which column in the files to use
-				!!!0-based!!!
-	x+3    : number of rows to consider
-				if nrows<1 then all rows are considered
-	"""
+    """
+    Argument list:
+    1-to-x : file names
+    The filename is ctritical. It should have the form xxxx_id.yyy
+    The prefactor file will use each files' id to find a corresponding match in the prefactor file
+    x+1    : pre-factor file
+    The prefactor file should have a specific format. Namely, the last entry should be the prefactor
+    and the one just before should be it the timestep
+    x+2    : which column in the files to use
+    !!!0-based!!!
+    x+3    : number of rows to consider
+    if nrows<1 then all rows are considered
+    """
     numOfFiles = len(sys.argv)-4
     listOfFiles = sys.argv[1:-3]     #names of files
     prfcFile = sys.argv[-3]
@@ -51,10 +51,14 @@ def main():
         else: correlation_data = autocorr(listOfFiles[k],coln)
 
         tmp = listOfFiles[k][::-1]
-        rndkey = listOfFiles[k][-tmp.find("_"):-tmp.find(".")] #find the last occurance of "_" and "."
+        rndkey = listOfFiles[k][-tmp.find("_"):-tmp.find(".")-1] #find the last occurance of "_" and "."
         print ".... key = ", rndkey
         for elem in prefacs:    
-            if elem[0] == float(rndkey):
+            print "**********DEBUG***********"
+	    print elem[0]
+	    print rndkey
+	    print "**************************"
+	    if elem[0] == float(rndkey):
                 prfc = float(elem[-1])
                 tstep = float(elem[-2])
                 break
@@ -95,8 +99,8 @@ def autocorr(flname,coln,nrows=-1):
     data = np.loadtxt(flname, skiprows=2 ,delimiter=" ", 
                       usecols=(coln,) )
     if nrows > 0:
-    print "++++++croppping++++++"
-    print str(len(data))
+        print "++++++croppping++++++"
+        print str(len(data))
         data = data[:nrows]
     # get the length of the data
     Nsteps = len(data)
