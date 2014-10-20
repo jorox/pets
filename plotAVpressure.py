@@ -65,8 +65,8 @@ def main():
             if atmsec:
                 line = line.strip().split()
                 id = int(line[0])-1 #first item is always the id
-                x = float(line[1]) #second item is always the coordinate
-                P = float(line[col-1])
+                x = float(line[col-2]) # coordinate always preceeds the pressure column
+                P = float(line[col-1]) # col is added as base-1 numbering
                 
                 atoms_x[id] = x
                 atoms_P[id] = P
